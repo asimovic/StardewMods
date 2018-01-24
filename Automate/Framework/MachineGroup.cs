@@ -18,6 +18,9 @@ namespace Pathoschild.Stardew.Automate.Framework
         /// <summary>The containers in the group.</summary>
         public IContainer[] Containers { get; }
 
+        /// <summary>The connectors in the group.</summary>
+        public IConnector[] Connectors { get; }
+
         /// <summary>The storage manager for the group.</summary>
         public IStorage StorageManager { get; }
 
@@ -35,12 +38,14 @@ namespace Pathoschild.Stardew.Automate.Framework
         /// <param name="location">The location containing the group.</param>
         /// <param name="machines">The machines in the group.</param>
         /// <param name="containers">The containers in the group.</param>
+        /// <param name="connectors">The connectors in the group.</param>
         /// <param name="tiles">The tiles comprising the group.</param>
-        public MachineGroup(GameLocation location, IMachine[] machines, IContainer[] containers, Vector2[] tiles)
+        public MachineGroup(GameLocation location, IMachine[] machines, IContainer[] containers, IConnector[] connectors, Vector2[] tiles)
         {
             this.Location = location;
             this.Machines = machines;
             this.Containers = containers;
+            this.Connectors = connectors;
             this.Tiles = tiles;
             this.StorageManager = new StorageManager(containers);
         }

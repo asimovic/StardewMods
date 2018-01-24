@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Pathoschild.Stardew.Automate.Framework.Connector;
 using Pathoschild.Stardew.Automate.Framework.Machines.Buildings;
 using Pathoschild.Stardew.Automate.Framework.Machines.Objects;
 using Pathoschild.Stardew.Automate.Framework.Machines.TerrainFeatures;
@@ -26,10 +27,20 @@ namespace Pathoschild.Stardew.Automate.Framework
         /// <summary>The tile area on the farm matching the shipping bin.</summary>
         private readonly Rectangle ShippingBinArea = new Rectangle(71, 14, 2, 1);
 
+        /// <summary>The connector to be used between machines.</summary>
+        private readonly PathConnectorType ConnectorType;
+
 
         /*********
         ** Public methods
         *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="connectorType">The connector type.</param>
+        public MachineFactory(PathConnectorType connectorType)
+        {
+            this.ConnectorType = connectorType;
+        }
+
         /// <summary>Get all machine groups in a location.</summary>
         /// <param name="location">The location to search.</param>
         /// <param name="reflection">Simplifies access to private game code.</param>
@@ -94,6 +105,11 @@ namespace Pathoschild.Stardew.Automate.Framework
                 else if (this.TryGetChest(location, tile, out Chest chest))
                 {
                     group.Add(new ChestContainer(chest));
+                    foundSize = Vector2.One;
+                }
+                else if (this.TryGetConnector(location, tile, out IConnector connector))
+                {
+                    group.Add(connector);
                     foundSize = Vector2.One;
                 }
                 else
@@ -301,6 +317,26 @@ namespace Pathoschild.Stardew.Automate.Framework
             }
 
             chest = null;
+            return false;
+        }
+
+        /// <summary>Get the connector on a given tile, if any.</summary>
+        /// <param name="location">The location to search.</param>
+        /// <param name="tile">The tile to search.</param>
+        /// <param name="connector">The connector found on the tile.</param>
+        private bool TryGetConnector(GameLocation location, Vector2 tile, out IConnector connector)
+        {
+            // terrain feature connector
+            if (location.terrainFeatures.TryGetValue(tile, out TerrainFeature feature))
+            {
+                if (feature is Flooring floor && floor.whichFloor == (int)this.ConnectorType)
+                {
+                    connector = new PathConnector();
+                    return true;
+                }
+            }
+
+            connector = null;
             return false;
         }
     }

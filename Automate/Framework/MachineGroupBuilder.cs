@@ -21,6 +21,9 @@ namespace Pathoschild.Stardew.Automate.Framework
         /// <summary>The containers in the group.</summary>
         private readonly HashSet<IContainer> Containers = new HashSet<IContainer>();
 
+        /// <summary>The connectors in the group.</summary>
+        private readonly HashSet<IConnector> Connectors = new HashSet<IConnector>();
+
         /// <summary>The tiles comprising the group.</summary>
         private readonly HashSet<Vector2> Tiles = new HashSet<Vector2>();
 
@@ -49,6 +52,13 @@ namespace Pathoschild.Stardew.Automate.Framework
             this.Containers.Add(container);
         }
 
+        /// <summary>Add a connector to the group.</summary>
+        /// <param name="connector">The connector to add.</param>
+        public void Add(IConnector connector)
+        {
+            this.Connectors.Add(connector);
+        }
+
         /// <summary>Add tiles to the group.</summary>
         /// <param name="tileArea">The tile area occupied by the container.</param>
         public void Add(Rectangle tileArea)
@@ -66,7 +76,8 @@ namespace Pathoschild.Stardew.Automate.Framework
         /// <summary>Create a group from the saved data.</summary>
         public MachineGroup Build()
         {
-            return new MachineGroup(this.Location, this.Machines.ToArray(), this.Containers.ToArray(), this.Tiles.ToArray());
+            return new MachineGroup(this.Location, this.Machines.ToArray(),
+                this.Containers.ToArray(), this.Connectors.ToArray(), this.Tiles.ToArray());
         }
 
         /// <summary>Clear the saved data.</summary>
@@ -74,6 +85,7 @@ namespace Pathoschild.Stardew.Automate.Framework
         {
             this.Machines.Clear();
             this.Containers.Clear();
+            this.Connectors.Clear();
             this.Tiles.Clear();
         }
     }
