@@ -16,9 +16,8 @@ namespace Pathoschild.Stardew.Automate.Framework.Models
         /// <summary>The number of ticks between each automation process (60 = once per second).</summary>
         public int AutomationInterval { get; set; } = 60;
 
-        /// <summary>The path flooring type to act as a connector between machines.</summary>
-        [JsonConverter(typeof(StringEnumArrayConverter))]
-        public PathConnectorType ConnectorPathType { get; set; } = PathConnectorType.WoodPath;
+        /// <summary>The path flooring types to act as a connector between machines.</summary>
+        public string[] ConnectorNames { get; set; } = { "Wood Path" };
 
         /// <summary>The control bindings.</summary>
         public ModConfigControls Controls { get; set; } = new ModConfigControls();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Pathoschild.Stardew.Automate.Framework;
+using Pathoschild.Stardew.Automate.Framework.Data;
 using Pathoschild.Stardew.Automate.Framework.Models;
 using Pathoschild.Stardew.Common;
 using StardewModdingAPI;
@@ -19,6 +20,14 @@ namespace Pathoschild.Stardew.Automate
         *********/
         /// <summary>The mod configuration.</summary>
         private ModConfig Config;
+        
+        /// <summary>Provides metadata that's not available from the game data directly.</summary>
+        private Metadata Metadata;
+
+        private Dictionary<int, ConnectorData> ConnectorsByItem;
+
+        /// <summary>The name of the file containing data for the <see cref="Metadata"/> field.</summary>
+        private readonly string DatabaseFileName = "data.json";
 
         /// <summary>Constructs machine instances.</summary>
         private MachineFactory Factory;
@@ -47,13 +56,16 @@ namespace Pathoschild.Stardew.Automate
             this.Config = helper.ReadConfig<ModConfig>();
 
             // setup the factory
-            this.Factory = new MachineFactory(this.Config.ConnectorPathType);
+            this.LoadMetadata();
+            this.ConnectorsByItem = GetConnectorsUsed();
+            this.Factory = new MachineFactory(this.ConnectorsByItem.Values.ToArray());
 
             // hook events
             SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
             LocationEvents.CurrentLocationChanged += this.LocationEvents_CurrentLocationChanged;
             LocationEvents.LocationsChanged += this.LocationEvents_LocationsChanged;
             LocationEvents.LocationObjectsChanged += this.LocationEvents_LocationObjectsChanged;
+            PlayerEvents.InventoryChanged += this.PlayerEvents_InventoryChanged;
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
 
             // handle player interaction
@@ -64,7 +76,6 @@ namespace Pathoschild.Stardew.Automate
                 this.Monitor.Log($"Verbose logging is enabled. This is useful when troubleshooting but can impact performance. It should be disabled if you don't explicitly need it. You can delete {Path.Combine(this.Helper.DirectoryPath, "config.json")} and restart the game to disable it.", LogLevel.Warn);
             this.VerboseLog($"Initialised with automation every {this.Config.AutomationInterval} ticks.");
         }
-
 
         /*********
         ** Private methods
@@ -115,14 +126,20 @@ namespace Pathoschild.Stardew.Automate
         private void LocationEvents_LocationObjectsChanged(object sender, EventArgsLocationObjectsChanged e)
         {
             this.VerboseLog("Object list changed, reloading machines in current location.");
+            ReloadCurrentLocation();
+        }
 
-            try
+        private void PlayerEvents_InventoryChanged(object sender, EventArgsInventoryChanged e)
+        {
+            //may not pick up all changes. (ex. breaking a path and not picking up the item)
+            var changed = e.Added
+                .Concat(e.QuantityChanged)
+                .Concat(e.Removed);
+
+            if (changed.Any(x => this.ConnectorsByItem.ContainsKey(x.Item.parentSheetIndex)))
             {
-                this.ReloadQueue.Add(Game1.currentLocation);
-            }
-            catch (Exception ex)
-            {
-                this.HandleError(ex, "updating the current location");
+                this.VerboseLog("Inventory connector item changed, reloading machines in current location.");
+                ReloadCurrentLocation();
             }
         }
 
@@ -187,6 +204,18 @@ namespace Pathoschild.Stardew.Automate
         /****
         ** Methods
         ****/
+        private void ReloadCurrentLocation()
+        {
+            try
+            {
+                this.ReloadQueue.Add(Game1.currentLocation);
+            }
+            catch (Exception ex)
+            {
+                this.HandleError(ex, "updating the current location");
+            }
+        }
+
         /// <summary>Get the machine groups in every location.</summary>
         private IEnumerable<MachineGroup> GetAllMachineGroups()
         {
@@ -245,6 +274,27 @@ namespace Pathoschild.Stardew.Automate
                 this.DisableOverlay();
                 this.EnableOverlay();
             }
+        }
+
+        private Dictionary<int, ConnectorData> GetConnectorsUsed()
+        {
+            var connectorQuery = this.Metadata.Connectors
+                .Where(x => this.Config.ConnectorNames.Contains(x.Name, StringComparer.CurrentCultureIgnoreCase));
+
+            var connectors = new Dictionary<int, ConnectorData>();
+            foreach (var connector in connectorQuery)
+                connectors[connector.ItemId] = connector;
+
+            return connectors;
+        }
+
+        /// <summary>Load the file containing metadata that's not available from the game directly.</summary>
+        private void LoadMetadata()
+        {
+            this.Monitor.InterceptErrors("loading metadata", () =>
+            {
+                this.Metadata = this.Helper.ReadJsonFile<Metadata>(this.DatabaseFileName);
+            });
         }
     }
 }

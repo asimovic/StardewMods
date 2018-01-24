@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Pathoschild.Stardew.Automate.Framework.Connector;
+using Pathoschild.Stardew.Automate.Framework.Data;
 using Pathoschild.Stardew.Automate.Framework.Machines.Buildings;
 using Pathoschild.Stardew.Automate.Framework.Machines.Objects;
 using Pathoschild.Stardew.Automate.Framework.Machines.TerrainFeatures;
@@ -27,18 +28,20 @@ namespace Pathoschild.Stardew.Automate.Framework
         /// <summary>The tile area on the farm matching the shipping bin.</summary>
         private readonly Rectangle ShippingBinArea = new Rectangle(71, 14, 2, 1);
 
-        /// <summary>The connector to be used between machines.</summary>
-        private readonly PathConnectorType ConnectorType;
+        /// <summary>The connectors to be used between machines.</summary>
+        private readonly Dictionary<int, ConnectorData> ConnectorsByFloor;
 
 
         /*********
         ** Public methods
         *********/
         /// <summary>Construct an instance.</summary>
-        /// <param name="connectorType">The connector type.</param>
-        public MachineFactory(PathConnectorType connectorType)
+        /// <param name="connectors">The connectors type to be used.</param>
+        public MachineFactory(ConnectorData[] connectors)
         {
-            this.ConnectorType = connectorType;
+            this.ConnectorsByFloor = new Dictionary<int, ConnectorData>();
+            foreach (var connector in connectors)
+                this.ConnectorsByFloor[connector.FlooringId] = connector;
         }
 
         /// <summary>Get all machine groups in a location.</summary>
@@ -329,7 +332,8 @@ namespace Pathoschild.Stardew.Automate.Framework
             // terrain feature connector
             if (location.terrainFeatures.TryGetValue(tile, out TerrainFeature feature))
             {
-                if (feature is Flooring floor && floor.whichFloor == (int)this.ConnectorType)
+                if (feature is Flooring floor &&
+                    this.ConnectorsByFloor.ContainsKey(floor.whichFloor))
                 {
                     connector = new PathConnector();
                     return true;

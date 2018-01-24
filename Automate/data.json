@@ -1,0 +1,29 @@
+{
+  "ConnectorItems" : [
+    {
+      "Name": "Gravel Path",
+      "ItemId": 407,
+      "FlooringId": 5
+    },
+    {
+      "Name": "Wood Path",
+      "ItemId": 405,
+      "FlooringId": 6
+    },
+    {
+      "Name": "Crystal Path",
+      "ItemId": 409,
+      "FlooringId": 7
+    },
+    {
+      "Name": "Cobblestone Path",
+      "ItemId": 411,
+      "FlooringId": 8
+    },
+    {
+      "Name": "Stepping Stone Path",
+      "ItemId": 415,
+      "FlooringId": 9
+    }
+  ]
+}

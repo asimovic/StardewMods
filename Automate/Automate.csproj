@@ -40,9 +40,10 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Framework\Data\ConnectorData.cs" />
     <Compile Include="Framework\Connector\PathConnector.cs" />
-    <Compile Include="PathType.cs" />
     <Compile Include="IConnector.cs" />
+    <Compile Include="Metadata.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="IConsumable.cs" />
     <Compile Include="IStorage.cs" />
@@ -95,6 +96,9 @@
     <Compile Include="Framework\Storage\ChestContainer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="manifest.json" />
     <None Include="packages.config" />
     <None Include="README.md" />
