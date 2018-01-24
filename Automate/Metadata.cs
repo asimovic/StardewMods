@@ -9,6 +9,6 @@ namespace Pathoschild.Stardew.Automate
 {
     internal class Metadata
     {
-        public ConnectorData[] Connectors { get; set; }
+        public ConnectorData[] ConnectorItems { get; set; }
     }
 }

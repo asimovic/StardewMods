@@ -278,7 +278,7 @@ namespace Pathoschild.Stardew.Automate
 
         private Dictionary<int, ConnectorData> GetConnectorsUsed()
         {
-            var connectorQuery = this.Metadata.Connectors
+            var connectorQuery = this.Metadata.ConnectorItems
                 .Where(x => this.Config.ConnectorNames.Contains(x.Name, StringComparer.CurrentCultureIgnoreCase));
 
             var connectors = new Dictionary<int, ConnectorData>();
